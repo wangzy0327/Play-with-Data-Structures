@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class BST<E extends Comparable<E>> {
     private class Node{
@@ -376,6 +373,148 @@ public class BST<E extends Comparable<E>> {
             postOrder(node.right);
             System.out.println(node.e);
         }
+    }
+
+    /**
+     * 二分搜索树的层序遍历
+     */
+    public void levelOrder(){
+        Queue<Node> q = new LinkedList<>();
+        q.add(root);
+        while(!q.isEmpty()){
+            Node cur = q.remove();
+            System.out.println(cur.e);
+            if(cur.left != null)
+                q.add(cur.left);
+            if(cur.right != null)
+                q.add(cur.right);
+        }
+    }
+
+    /**
+     * 找寻二分搜索树中的最小元素
+     * @return
+     */
+    public E minimum(){
+        if(size == 0)
+            throw new IllegalArgumentException("BST is empty.");
+        return minimum(root).e;
+    }
+
+    /**
+     * 返回以node为根的二分搜索树的最小值的所在节点
+     * @param node
+     * @return
+     */
+    private Node minimum(Node node){
+        if(node.left == null)
+            return node;
+        return minimum(node.left);
+    }
+
+    /**
+     * 找寻二分搜索树中的最小元素
+     * 非递归
+     * @return
+     */
+    public E minimumNR(){
+        if(size == 0)
+            throw new IllegalArgumentException("BST is empty.");
+        Node node = root;
+        while(node.left != null){
+            node = node.left;
+        }
+        return node.e;
+    }
+
+    /**
+     * 找寻二分搜索树中的最大元素
+     * @return
+     */
+    public E maxinum(){
+        if(size == 0)
+            throw new IllegalArgumentException("BST is empty.");
+        return maxinum(root).e;
+    }
+
+    /**
+     * 返回以node为根的二分搜索树的最大值的所在节点
+     * @param node
+     * @return
+     */
+    private Node maxinum(Node node){
+        if(node.right == null)
+            return node;
+        return maxinum(node.right);
+    }
+
+    /**
+     * 找寻二分搜索树中的最大元素
+     * 非递归
+     * @return
+     */
+    public E maxinumNR(){
+        if(size == 0)
+            throw new IllegalArgumentException("BST is empty.");
+        Node node = root;
+        while(node.right != null){
+            node = node.right;
+        }
+        return node.e;
+    }
+
+    /**
+     * 从二分搜索树中删除最小值所在节点，返回最小值
+     * @return
+     */
+    public E removeMin(){
+        E ret = minimum();
+        root = removeMin(root);
+        return ret;
+    }
+
+    /**
+     * 删除掉以node为根的二分搜索树中的最小节点
+     * 返回删除节点后新的二分搜索树的根
+     * @param node
+     * @return
+     */
+    private Node removeMin(Node node){
+        if(node.left == null){
+            Node rightNode = node.right;
+            node.right = null;
+            size--;
+            return rightNode;
+        }
+        node.left = removeMin(node.left);
+        return node;
+    }
+
+    /**
+     * 从二分搜索树中删除最小值所在节点，返回最大值
+     * @return
+     */
+    public E removeMax(){
+        E ret = maxinum();
+        root = removeMax(root);
+        return ret;
+    }
+
+    /**
+     * 删除掉以node为根的二分搜索树中的最大节点
+     * 返回删除节点后新的二分搜索树的根
+     * @param node
+     * @return
+     */
+    private Node removeMax(Node node){
+        if(node.right == null){
+            Node leftNode = node.left;
+            node.left = null;
+            size--;
+            return leftNode;
+        }
+        node.right = removeMax(node.right);
+        return node;
     }
 
     @Override

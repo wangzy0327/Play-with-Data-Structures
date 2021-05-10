@@ -25,12 +25,15 @@ public class Main {
 //        bst.inOrderNR();
 //        System.out.println();
 
-        bst.postOrder();
+//        bst.postOrder();
         //2 4 3 8 6 5
-        System.out.println();
-        bst.postOrderNR();
+//        System.out.println();
+//        bst.postOrderNR();
 //        bst.postOrderNR1();
 //        bst.postOrderNR2();
-        System.out.println();
+//        System.out.println();
+
+        bst.levelOrder();
+
     }
 }
