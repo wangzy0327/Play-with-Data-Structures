@@ -213,17 +213,64 @@ public class AVLTree<K extends Comparable<K>,V> implements Map<K,V>{
         }
         //LR
         else if(balanceFactor > 1 && getBalanceFactor(node.left) < 0){
-            Node x = leftRotate(node.left);
-            node.left = x;
+            node.left = leftRotate(node.left);
             return rightRotate(node);
         }
         //RL
         else if(balanceFactor < -1 && getBalanceFactor(node.right) > 0){
-            Node x = rightRotate(node.right);
-            node.right = x;
+            node.right = rightRotate(node.right);
             return leftRotate(node);
         }
         return node;
+    }
+
+    /**
+     * 返回以node为根节点的二分搜索树中，key所在的节点
+     * @param node
+     * @param key
+     * @return
+     */
+    private Node getNode(Node node,K key){
+        if(node == null)
+            return null;
+        if(key.equals(node.key))
+            return node;
+        else if(key.compareTo(node.key) < 0)
+            return getNode(node.left,key);
+        else
+            //key.compareTo(node.key) > 0
+            return getNode(node.right,key);
+    }
+
+    @Override
+    public boolean contains(K key) {
+        return getNode(root,key) != null;
+    }
+
+    @Override
+    public V get(K key) {
+        Node node = getNode(root,key);
+        return node == null ? null : node.value;
+    }
+
+    @Override
+    public void set(K key, V newValue) {
+        Node node = getNode(root,key);
+        if(node == null)
+            throw new IllegalArgumentException(key+" doesn't exist!");
+        node.value = newValue;
+    }
+
+
+    /**
+     * 返回以node为根的二分搜索树的最小值所在的节点
+     * @param node
+     * @return
+     */
+    private Node minimum(Node node){
+        if(node.left == null)
+            return node;
+        return minimum(node.left);
     }
 
 
@@ -250,93 +297,86 @@ public class AVLTree<K extends Comparable<K>,V> implements Map<K,V>{
      * @return
      */
     private Node remove(Node node,K key){
+
         if(node == null)
             return null;
+
         Node retNode;
-        if(key.compareTo(node.key) < 0){
-            node.left = remove(node.left,key);
-            retNode = node;
-        }else if(key.compareTo(node.key) > 0){
-            node.right = remove(node.right,key);
+        if( key.compareTo(node.key) < 0 ){
+            node.left = remove(node.left , key);
+            // return node;
             retNode = node;
         }
-        else {//key.equals(node.key)
+        else if(key.compareTo(node.key) > 0 ){
+            node.right = remove(node.right, key);
+            // return node;
+            retNode = node;
+        }
+        else{   // key.compareTo(node.key) == 0
+
             // 待删除节点左子树为空的情况
             if(node.left == null){
                 Node rightNode = node.right;
                 node.right = null;
                 size --;
+                // return rightNode;
                 retNode = rightNode;
-                // 待删除节点右子树为空的情况
-            }else if(node.right == null){
+            }
+
+            // 待删除节点右子树为空的情况
+            else if(node.right == null){
                 Node leftNode = node.left;
                 node.left = null;
                 size --;
+                // return leftNode;
                 retNode = leftNode;
-            }else{
-                // 待删除节点左右子树均不为空的情况
+            }
 
+            // 待删除节点左右子树均不为空的情况
+            else{
                 // 找到比待删除节点大的最小节点, 即待删除节点右子树的最小节点
                 // 用这个节点顶替待删除节点的位置
                 Node successor = minimum(node.right);
-//                successor.right = removeMin(node.right);
-                successor.right = remove(node.right,successor.key);
+                //successor.right = removeMin(node.right);
+                successor.right = remove(node.right, successor.key);
                 successor.left = node.left;
 
                 node.left = node.right = null;
 
+                // return successor;
                 retNode = successor;
             }
         }
+
         if(retNode == null)
             return null;
 
-//更新height
-        retNode.height = Math.max(getHeight(retNode.left),getHeight(retNode.right)) + 1;
+        // 更新height
+        retNode.height = 1 + Math.max(getHeight(retNode.left), getHeight(retNode.right));
 
+        // 计算平衡因子
         int balanceFactor = getBalanceFactor(retNode);
-//        if(Math.abs(getBalanceFactor(node)) > 1){
-//            //TODO
-//            System.out.println("unbalances : "+balanceFactor);
-//        }
-        //平衡维护
-        //LL
-        if(balanceFactor > 1 && getBalanceFactor(node.left) >= 0){
+        // 平衡维护
+        // LL
+        if (balanceFactor > 1 && getBalanceFactor(retNode.left) >= 0)
             return rightRotate(retNode);
-            //RR
-        }
-        if(balanceFactor < -1 && getBalanceFactor(node.right) <= 0) {
+        // RR
+        else if (balanceFactor < -1 && getBalanceFactor(retNode.right) <= 0)
             return leftRotate(retNode);
-        }
         //LR
-        if(balanceFactor > 1 && getBalanceFactor(retNode.left) < 0){
-            Node x = leftRotate(retNode.left);
-            retNode.left = x;
+        else if(balanceFactor > 1 && getBalanceFactor(retNode.left) < 0){
+            retNode.left = leftRotate(retNode.left);
             return rightRotate(retNode);
         }
         //RL
-        if(balanceFactor < -1 && getBalanceFactor(retNode.right) > 0){
-            Node x = rightRotate(retNode.right);
-            retNode.right = x;
+        else if(balanceFactor < -1 && getBalanceFactor(retNode.right) > 0){
+            retNode.right = rightRotate(retNode.right);
             return leftRotate(retNode);
         }
         return retNode;
 
     }
 
-
-
-
-    /**
-     * 返回以node为根的二分搜索树的最小值所在的节点
-     * @param node
-     * @return
-     */
-    private Node minimum(Node node){
-        if(node.left == null)
-            return node;
-        return minimum(node.left);
-    }
 
     /**
      * 删除掉以node为根的二分搜索树中的最小节点
@@ -354,43 +394,6 @@ public class AVLTree<K extends Comparable<K>,V> implements Map<K,V>{
 
         node.left = removeMin(node.left);
         return node;
-    }
-
-    @Override
-    public boolean contains(K key) {
-        return getNode(root,key) != null;
-    }
-
-    /**
-     * 返回以node为根节点的二分搜索树中，key所在的节点
-     * @param node
-     * @param key
-     * @return
-     */
-    private Node getNode(Node node,K key){
-        if(node == null)
-            return null;
-        if(key.equals(node.key))
-            return node;
-        else if(key.compareTo(node.key) < 0)
-            return getNode(node.left,key);
-        else
-            //key.compareTo(node.key) > 0
-            return getNode(node.right,key);
-    }
-
-    @Override
-    public V get(K key) {
-        Node node = getNode(root,key);
-        return node == null ? null : node.value;
-    }
-
-    @Override
-    public void set(K key, V newValue) {
-        Node node = getNode(root,key);
-        if(node == null)
-            throw new IllegalArgumentException(key+" doesn't exist!");
-        node.value = newValue;
     }
 
 
@@ -417,11 +420,13 @@ public class AVLTree<K extends Comparable<K>,V> implements Map<K,V>{
             System.out.println("is BST : " + map.isBST());
             System.out.println("is Balanced : " + map.isBalanced());
 
-//            for(String word: words){
-//                map.remove(word);
-//                if(!map.isBST() || !map.isBalanced())
-//                    throw new RuntimeException();
-//            }
+            for(String word: words){
+                map.remove(word);
+                if(!map.isBST() )
+                    throw new RuntimeException("isBST Error");
+                if(!map.isBalanced())
+                    throw new RuntimeException("balanced Error");
+            }
 
         }
 
