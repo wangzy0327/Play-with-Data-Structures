@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class AVLTree<K extends Comparable<K>,V> implements Map<K,V>{
+public class AVLTreeAdv<K extends Comparable<K>,V> implements Map<K,V>{
 
     private class Node{
         private K key;
@@ -20,7 +20,7 @@ public class AVLTree<K extends Comparable<K>,V> implements Map<K,V>{
     private Node root;
     private int size;
 
-    public AVLTree(){
+    public AVLTreeAdv(){
         root = null;
         size = 0;
     }
@@ -188,12 +188,18 @@ public class AVLTree<K extends Comparable<K>,V> implements Map<K,V>{
             size++;
             return new Node(key,value);
         }
+        int leftChildHeight = node.left == null ? 0 : node.left.height;
+        int rightChildHeight = node.right == null ? 0 : node.right.height;
         if(node.key.equals(key))
             node.value = value;
         else if(key.compareTo(node.key) < 0)
             node.left = add(node.left,key,value);
         else //  key.compareTo(node.key) > 0
             node.right = add(node.right,key,value);
+
+        //优化 如果当前节点的高度没变，则它的父亲和祖先节点的高度和平衡因子不需要维护,直接返回
+        if(leftChildHeight == getHeight(node.left) && rightChildHeight == getHeight(node.right))
+            return node;
 
         //更新height
         node.height = Math.max(getHeight(node.left),getHeight(node.right)) + 1;
@@ -351,8 +357,8 @@ public class AVLTree<K extends Comparable<K>,V> implements Map<K,V>{
         if(retNode == null)
             return null;
 
-        // 更新height
-        retNode.height = 1 + Math.max(getHeight(retNode.left), getHeight(retNode.right));
+        //更新height
+        retNode.height = Math.max(getHeight(retNode.left),getHeight(retNode.right)) + 1;
 
         // 计算平衡因子
         int balanceFactor = getBalanceFactor(retNode);
@@ -404,7 +410,7 @@ public class AVLTree<K extends Comparable<K>,V> implements Map<K,V>{
         if(FileOperation.readFile("pride-and-prejudice.txt", words)) {
             System.out.println("Total words: " + words.size());
 
-            AVLTree<String, Integer> map = new AVLTree<>();
+            AVLTreeAdv<String, Integer> map = new AVLTreeAdv<>();
             for (String word : words) {
                 if (map.contains(word))
                     map.set(word, map.get(word) + 1);
